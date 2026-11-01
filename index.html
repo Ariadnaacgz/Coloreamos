@@ -616,8 +616,8 @@ function renderRecents() {
 function favoriteIds(){try{return JSON.parse(localStorage.getItem('col.favorites')||'[]')}catch(e){return[]}}
 function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
 function sceneCategory(key){
- if(key.startsWith('mandala'))return 'mandalas';
  if(['flor','mandala-loto'].includes(key))return 'flowers';
+ if(key.startsWith('mandala'))return 'mandalas';
  if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
  return 'other';
 }
