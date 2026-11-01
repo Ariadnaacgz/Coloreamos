@@ -191,6 +191,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
           <button class="btn" id="eraser" aria-pressed="false">Borrar sector</button>
           <button class="btn" id="eyedropper" type="button" aria-pressed="false">💧 Gotero</button>
         </div>
+        <p class="muted" id="autosaveStatus">Guardado automático activado</p>
         <div class="row palette-tools">
           <button class="btn" id="savePalette" type="button">Guardar paleta</button>
           <select id="paletteSelect" aria-label="Mis paletas"><option value="">Mis paletas…</option></select>
@@ -753,8 +754,8 @@ function favoriteIds(){try{return JSON.parse(localStorage.getItem('col.favorites
 function paletteList(){try{return JSON.parse(localStorage.getItem('col.palettes')||'[]')}catch(e){return[]}}
 function activePalette(){try{const p=JSON.parse(localStorage.getItem('col.activePalette')||'null');return Array.isArray(p)&&p.length?p:PALETTE}catch(e){return PALETTE}}
 function refreshPaletteSelect(){const el=$('paletteSelect');if(!el)return;const keep=el.value;el.textContent='';const first=document.createElement('option');first.value='';first.textContent='Mis paletas…';el.append(first);paletteList().forEach((p,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=p.name;el.append(o)});if(keep&&Number(keep)<el.options.length)el.value=keep}
-function saveLocalBoard(b){if(!b)return;try{localStorage.setItem('col.autosave.'+b.id,JSON.stringify({version:b.version||0,kind:b.meta.kind,key:b.meta.key||null,name:b.meta.name||'Dibujo',fills:[...b.fills.entries()]}))}catch(e){if(!b.storageWarned){b.storageWarned=true;toast('No hay espacio para guardar el progreso en este dispositivo.')}}}
-function restoreLocalBoard(b){try{const raw=localStorage.getItem('col.autosave.'+b.id);if(!raw)return;const saved=JSON.parse(raw);if(saved.kind!==b.meta.kind||saved.key!==(b.meta.key||null)||saved.version!==(b.version||0))return;(saved.fills||[]).forEach(([rid,color])=>{if(Number.isInteger(rid)&&rid>=0&&rid<b.scene.count&&HEX.test(color))b.fills.set(rid,color)});}catch(e){}}
+function saveLocalBoard(b){if(!b)return;try{localStorage.setItem('col.autosave.'+b.id,JSON.stringify({version:b.version||0,kind:b.meta.kind,key:b.meta.key||null,name:b.meta.name||'Dibujo',fills:[...b.fills.entries()]}));const st=$('autosaveStatus');if(st)st.textContent='Guardado automáticamente · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){if(!b.storageWarned){b.storageWarned=true;toast('No hay espacio para guardar el progreso en este dispositivo.')}}}
+function restoreLocalBoard(b){try{const raw=localStorage.getItem('col.autosave.'+b.id);if(!raw)return;const saved=JSON.parse(raw);if(saved.kind!==b.meta.kind||saved.key!==(b.meta.key||null)||saved.name!==(b.meta.name||'Dibujo')||saved.version!==(b.version||0))return;(saved.fills||[]).forEach(([rid,color])=>{if(Number.isInteger(rid)&&rid>=0&&rid<b.scene.count&&HEX.test(color))b.fills.set(rid,color)});}catch(e){}}
 function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
 function sceneCategory(key){
  if(['flor','mandala-loto','tulipanes','rosas','girasol','ramo-flores'].includes(key))return 'flowers';
