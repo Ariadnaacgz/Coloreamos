@@ -127,6 +127,8 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
         <button class="btn" type="button" data-category="animals" aria-pressed="false">🐾 Animales</button>
         <button class="btn" type="button" data-category="flowers" aria-pressed="false">🌸 Flores</button>
         <button class="btn" type="button" data-category="mandalas" aria-pressed="false">✿ Mandalas</button>
+        <button class="btn" type="button" data-category="characters" aria-pressed="false">🧸 Personajes</button>
+        <button class="btn" type="button" data-category="vehicles" aria-pressed="false">🚗 Autos y vehículos</button>
         <button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
       </div>
         <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
@@ -419,6 +421,59 @@ addScene('tortuga','Tortuga','Animal · caparazón por partes',()=>{
  L.push('M770 585q35 35 70 0M420 500l80-50 80 50M420 640l80 55 80-55');
  return {R,L};
 });
+
+addScene('robot-amigo','Robot amigo','Personaje · piezas grandes y pequeñas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000));
+ R.push(rect(390,170,220,90),circ(500,125,42),rect(485,75,30,55));
+ R.push(ell(500,390,205,190),rect(340,535,320,235));
+ R.push(ell(405,365,48,58),ell(595,365,48,58),circ(405,365,20),circ(595,365,20));
+ R.push(ell(500,465,75,35),rect(455,570,90,85));
+ R.push(rect(250,570,90,190),rect(660,570,90,190),circ(295,790,58),circ(705,790,58));
+ R.push(rect(390,770,85,145),rect(525,770,85,145),ell(430,920,70,35),ell(570,920,70,35));
+ R.push(circ(370,250,22),circ(630,250,22),circ(500,390,12));
+ L.push('M450 465q50 35 100 0M370 700h260');return {R,L};
+});
+addScene('astronauta','Pequeño astronauta','Personaje · exploración espacial',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(790,170,70),star(180,190,55),star(820,780,42));
+ R.push(ell(500,330,190,205),ell(500,330,130,145),ell(500,600,170,210));
+ R.push(ell(500,330,100,112),ell(420,585,70,80,-20),ell(580,585,70,80,20));
+ R.push(rect(400,740,80,145),rect(520,740,80,145),ell(440,895,75,42),ell(560,895,75,42));
+ R.push(rect(300,530,65,150),rect(635,530,65,150),circ(332,690,40),circ(668,690,40));
+ R.push(circ(500,600,35),rect(450,630,100,55));L.push('M410 335q90 65 180 0M420 450q80 55 160 0');return {R,L};
+});
+addScene('unicornio','Unicornio mágico','Personaje · crin y estrellas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),star(180,190,55),star(820,220,45),star(800,790,55));
+ R.push(ell(500,530,245,235),poly([[390,350],[455,115],[535,350]]));
+ R.push(ell(350,390,85,125,-35),ell(650,390,85,125,35));
+ R.push(ell(500,600,175,120),ell(425,515,28,38),ell(575,515,28,38));
+ R.push(circ(425,515,12),circ(575,515,12),ell(500,650,55,35));
+ R.push(ell(350,700,75,45,-25),ell(650,700,75,45,25));
+ R.push(ell(380,300,65,45,-35),ell(500,265,65,45),ell(620,300,65,45,35));
+ L.push('M450 685q50 35 100 0M360 450q-35-40-55-20M640 450q35-40 55-20');return {R,L};
+});
+addScene('auto','Auto','Vehículo · carrocería, ventanas y ruedas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(160,170,55),circ(830,150,35));
+ R.push(poly([[180,570],[270,390],[690,390],[820,570]]));
+ R.push(rect(130,560,740,190),poly([[300,430],[410,430],[410,550],[235,550]]),poly([[440,430],[660,430],[760,550],[440,550]]));
+ R.push(circ(300,755,105),circ(300,755,52),circ(700,755,105),circ(700,755,52));
+ R.push(rect(135,600,100,65),rect(765,600,100,65),rect(420,600,160,60),circ(180,700,22),circ(820,700,22));
+ L.push('M130 680h740');return {R,L};
+});
+addScene('auto-carrera','Auto de carreras','Vehículo · diseño deportivo',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),star(170,180,48),star(830,180,48));
+ R.push(poly([[120,570],[230,470],[680,470],[880,570],[840,700],[160,700]]));
+ R.push(poly([[330,480],[420,350],[640,350],[740,480]]),poly([[430,390],[620,390],[680,470],[390,470]]));
+ R.push(circ(290,720,95),circ(290,720,45),circ(710,720,95),circ(710,720,45));
+ R.push(rect(390,560,220,75),circ(500,595,32),rect(90,500,110,35),rect(800,500,110,35));
+ R.push(poly([[460,660],[500,620],[540,660],[520,690],[480,690]]));
+ L.push('M230 570h540M420 430h200');return {R,L};
+});
+addScene('avion','Avión','Vehículo · alas y ventanas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),star(180,180,45),star(820,780,45));
+ R.push(poly([[465,120],[535,120],[570,520],[850,690],[850,755],[565,650],[550,850],[650,920],[650,955],[500,900],[350,955],[350,920],[450,850],[435,650],[150,755],[150,690],[430,520]]));
+ R.push(poly([[465,120],[535,120],[550,400],[450,400]]),poly([[430,520],[150,690],[150,755],[450,650]]),poly([[570,520],[850,690],[850,755],[565,650]]));
+ for(let i=0;i<5;i++)R.push(circ(500,300+i*65,18));L.push('M470 160h60M475 455h50');return {R,L};
+});
 /* ---------- Scene engines: both expose {w,h,count,hit(x,y),draw(ctx,fills,scale)} ---------- */
 const INK = '#23253F';
 function hexRGB(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -432,8 +487,8 @@ function vectorScene(def) {
     hit(x, y, ctx, sc) {
       ctx.save(); ctx.setTransform(sc, 0, 0, sc, 0, 0);
       let found = -1;
-      // regs[0] is the full-page background; it must never be a paintable region.
-      for (let i = regs.length - 1; i >= 1; i--) if (ctx.isPointInPath(regs[i], x * sc, y * sc)) { found = i; break; }
+      // The full-page background is a paintable fallback behind all other regions.
+      for (let i = regs.length - 1; i >= 0; i--) if (ctx.isPointInPath(regs[i], x * sc, y * sc)) { found = i; break; }
       ctx.restore(); return found;
     },
     draw(ctx, fills, scale) {
@@ -619,6 +674,8 @@ function sceneCategory(key){
  if(['flor','mandala-loto'].includes(key))return 'flowers';
  if(key.startsWith('mandala'))return 'mandalas';
  if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
+ if(['robot-amigo','astronauta','unicornio'].includes(key))return 'characters';
+ if(['auto','auto-carrera','avion'].includes(key))return 'vehicles';
  return 'other';
 }
 function buildLibrary(){
