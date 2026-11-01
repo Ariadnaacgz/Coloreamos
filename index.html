@@ -134,7 +134,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
         <button class="btn" type="button" data-category="mandalas" aria-pressed="false">✿ Mandalas</button>
         <button class="btn" type="button" data-category="characters" aria-pressed="false">🧸 Personajes</button>
         <button class="btn" type="button" data-category="vehicles" aria-pressed="false">🚗 Autos y vehículos</button>
-        <button class="btn" type="button" data-category="nature" aria-pressed="false">🦋 Naturaleza</button><button class="btn" type="button" data-category="food" aria-pressed="false">🍰 Comidas kawaii</button><button class="btn" type="button" data-category="pets" aria-pressed="false">🐶 Mascotas</button><button class="btn" type="button" data-category="fantasy" aria-pressed="false">🏰 Fantasía</button><button class="btn" type="button" data-category="home" aria-pressed="false">🏡 Hogar</button><button class="btn" type="button" data-category="fashion" aria-pressed="false">👗 Moda</button><button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
+        <button class="btn" type="button" data-category="nature" aria-pressed="false">🦋 Naturaleza</button><button class="btn" type="button" data-category="food" aria-pressed="false">🍰 Comidas kawaii</button><button class="btn" type="button" data-category="pets" aria-pressed="false">🐶 Mascotas</button><button class="btn" type="button" data-category="fantasy" aria-pressed="false">🏰 Fantasía</button><button class="btn" type="button" data-category="home" aria-pressed="false">🏡 Hogar</button><button class="btn" type="button" data-category="fashion" aria-pressed="false">👗 Moda</button><button class="btn" type="button" data-category="cozy" aria-pressed="false">🧸 Bobbie Goods / Cozy</button><button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
       </div>
         <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
         <button class="btn" id="allDrawings" type="button" aria-pressed="true">Todos</button>
@@ -762,6 +762,73 @@ function refreshPaletteSelect(){const el=$('paletteSelect');if(!el)return;const 
 function saveLocalBoard(b){if(!b)return;try{localStorage.setItem('col.autosave.'+b.id,JSON.stringify({version:b.version||0,kind:b.meta.kind,key:b.meta.key||null,name:b.meta.name||'Dibujo',fills:[...b.fills.entries()]}));const st=$('autosaveStatus');if(st)st.textContent='Guardado automáticamente · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){if(!b.storageWarned){b.storageWarned=true;toast('No hay espacio para guardar el progreso en este dispositivo.')}}}
 function restoreLocalBoard(b){try{const raw=localStorage.getItem('col.autosave.'+b.id);if(!raw)return;const saved=JSON.parse(raw);if(saved.kind!==b.meta.kind||saved.key!==(b.meta.key||null)||saved.name!==(b.meta.name||'Dibujo')||saved.version!==(b.version||0))return;(saved.fills||[]).forEach(([rid,color])=>{if(Number.isInteger(rid)&&rid>=0&&rid<b.scene.count&&HEX.test(color))b.fills.set(rid,color)});}catch(e){}}
 function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
+
+/* ---------- Colección original Cozy: escenas detalladas para colorear ---------- */
+addScene('cozy-osito','Osito y galletitas','Cozy · cocina y merienda',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),rect(105,100,790,520),rect(155,150,300,390),rect(545,150,300,390));
+ R.push(rect(470,120,60,500),rect(105,365,790,45),rect(80,690,840,220));
+ R.push(ell(500,490,190,205),ell(350,330,78,95),ell(650,330,78,95),ell(350,330,38,52),ell(650,330,38,52));
+ R.push(ell(500,500,115,100),ell(500,555,70,48),circ(455,475,17),circ(545,475,17));
+ R.push(ell(500,760,150,170),ell(380,760,70,115),ell(620,760,70,115),poly([[390,690],[610,690],[650,870],[350,870]]));
+ R.push(ell(260,665,72,50),ell(740,665,72,50),ell(265,650,52,34),ell(735,650,52,34));
+ R.push(ell(500,640,90,45),ell(500,625,70,28),circ(470,620,12),circ(530,620,12));
+ R.push(rect(170,740,115,95),circ(225,730,58),circ(200,715,12),circ(245,740,12),circ(500,820,16));
+ for(let x=210;x<=790;x+=145){R.push(star(x,245+(x%3)*18,22));}
+ L.push('M390 510q-35 25-65 0M610 510q35 25 65 0M455 570q45 35 90 0','M150 590q90-55 180 0M670 590q90-55 180 0');
+ return {R,L};});
+addScene('cozy-gatito','Gatito y chocolate caliente','Cozy · lectura y bebida',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),rect(100,110,800,470),rect(150,160,320,350),rect(530,160,320,350),rect(485,110,30,470));
+ R.push(rect(90,700,820,170),ell(500,650,190,170),ell(365,475,80,145,-25),ell(635,475,80,145,25));
+ R.push(ell(500,470,175,165),ell(385,325,95,100),ell(615,325,95,100),ell(385,325,48,55),ell(615,325,48,55));
+ R.push(ell(500,520,85,62),circ(500,485,24),ell(500,565,45,24),circ(445,455,15),circ(555,455,15));
+ R.push(ell(500,770,115,70),rect(390,670,220,105),ell(500,670,110,30),ell(500,660,88,18),ell(620,720,55,62),ell(620,720,30,38));
+ R.push(ell(500,635,15,45),ell(540,610,15,40),ell(575,635,15,35));
+ R.push(rect(180,770,95,65),ell(225,770,48,18),circ(225,755,12),star(780,250,32),circ(770,360,18));
+ L.push('M390 555l-55 25M610 555l55 25M420 610q80 60 160 0','M180 880q320-55 640 0');
+ return {R,L};});
+addScene('cozy-perrito','Perrito en su camita','Cozy · siesta y almohadones',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),rect(100,120,800,420),rect(155,175,690,300),rect(80,730,840,150));
+ R.push(ell(500,730,360,170),ell(500,760,300,115),ell(500,560,205,190),ell(345,470,90,145,-25),ell(655,470,90,145,25));
+ R.push(ell(345,470,45,85,-25),ell(655,470,45,85,25),ell(500,570,125,105),ell(500,625,72,48));
+ R.push(circ(450,535,18),circ(550,535,18),ell(500,615,25,18),ell(500,665,55,25));
+ R.push(ell(340,735,85,65),ell(660,735,85,65),ell(500,820,95,45));
+ R.push(ell(235,800,65,40),ell(765,800,65,40),star(210,240,32),star(790,260,28),circ(700,180,22));
+ for(let x=300;x<=700;x+=100)R.push(circ(x,780+(x%2)*12,13));
+ L.push('M410 585q-30 25-55 0M590 585q30 25 55 0','M400 670q100 70 200 0','M180 720q70-65 140 0M680 720q70-65 140 0');
+ return {R,L};});
+addScene('cozy-picnic','Picnic con amigos','Cozy · ositos, frutas y flores',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),circ(820,170,72),ell(220,170,100,40),ell(175,150,45,40),ell(260,145,50,45));
+ R.push('M0 730Q250 650 500 735T1000 700L1000 1000L0 1000Z');
+ R.push(poly([[170,610],[830,610],[760,890],[240,890]]),poly([[170,610],[500,730],[830,610],[760,890],[240,890]]));
+ for(let i=0;i<5;i++)R.push(ann(500,745,0,310, i*72, (i+1)*72));
+ R.push(ell(330,490,130,145),ell(245,390,55,75),ell(415,390,55,75),ell(330,500,80,70),circ(305,480,12),circ(355,480,12),ell(330,530,28,20));
+ R.push(ell(670,500,130,140),ell(585,400,52,72),ell(755,400,52,72),ell(670,510,78,65),circ(645,490,12),circ(695,490,12),ell(670,540,28,18));
+ R.push(circ(430,690,62),circ(570,690,62),ell(500,680,95,55),star(130,330,30),star(870,370,28));
+ R.push(ell(130,820,38,25),ell(870,820,38,25),ell(120,770,28,45),ell(880,770,28,45));
+ L.push('M280 545q50 40 100 0M620 555q50 40 100 0','M300 575q30 20 60 0M640 585q30 20 60 0');
+ return {R,L};});
+addScene('cozy-cafeteria','Cafetería pequeñita','Cozy · mostrador y dulces',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),rect(90,110,820,690),rect(145,165,710,285),rect(145,165,710,45),rect(475,165,50,285));
+ R.push(rect(120,520,760,250),rect(80,770,840,100),rect(165,275,180,145),rect(655,275,180,145));
+ R.push(ell(255,340,55,48),ell(255,315,38,28),circ(235,340,10),circ(275,340,10),ell(745,340,55,48),ell(745,315,38,28));
+ R.push(rect(190,580,180,150),ell(280,580,90,28),ell(280,570,65,18),circ(250,570,12),circ(310,570,12));
+ R.push(rect(425,590,150,135),ell(500,590,75,25),ell(500,575,55,18),ell(575,660,35,48),ell(575,660,18,30));
+ R.push(rect(630,580,180,150),ell(720,580,90,28),ell(720,560,65,22),star(720,535,24));
+ R.push(rect(420,220,160,65),poly([[420,220],[500,145],[580,220]]),rect(455,225,90,55));
+ for(let x=210;x<=790;x+=145)R.push(circ(x,820,22));
+ L.push('M200 470q300 70 600 0','M180 880q320-45 640 0','M465 610q35-35 70 0');
+ return {R,L};});
+addScene('cozy-casita-lluvia','Casita en día de lluvia','Cozy · ventanas, nubes y jardín',()=>{const R=[],L=[];
+ R.push(rect(0,0,1000,1000),ell(280,190,125,62),ell(390,170,95,70),ell(490,205,120,55),ell(740,150,110,55));
+ R.push(poly([[160,470],[500,190],[840,470]]),rect(220,450,560,420),rect(430,650,140,220),ell(500,650,70,30));
+ R.push(rect(285,520,145,145),rect(570,520,145,145),rect(350,550,15,115),rect(640,550,15,115));
+ R.push(rect(120,850,760,45),ell(170,840,70,28),ell(830,840,70,28));
+ for(let x=180;x<=820;x+=160){R.push(ell(x,340,24,45,15),ell(x+35,355,24,45,15));}
+ R.push(circ(160,560,55),circ(160,500,38),rect(140,555,40,110),circ(840,560,55),circ(840,500,38),rect(820,555,40,110));
+ for(let x=250;x<=750;x+=125)R.push(star(x,930,18));
+ L.push('M250 250l-35 80M390 225l-35 80M610 225l-35 80M760 220l-35 80','M0 920q250-60 500 0t500 0');
+ return {R,L};});
+
 function sceneCategory(key){
  if(['flor','mandala-loto','tulipanes','rosas','girasol','ramo-flores'].includes(key))return 'flowers';
  if(key.startsWith('mandala'))return 'mandalas';
@@ -769,6 +836,7 @@ function sceneCategory(key){
  if(['robot-amigo','astronauta','unicornio'].includes(key))return 'characters';
  if(['auto','auto-carrera','avion'].includes(key))return 'vehicles';
  if(key==='mariposa'||key==='abejita')return 'nature';
+ if(key.startsWith('cozy-'))return 'cozy';
  if(key==='helado')return 'food'; if(key==='perrito'||key==='conejo')return 'pets'; if(key==='castillo'||key==='dragon')return 'fantasy'; if(key==='casita-cozy')return 'home'; if(key==='vestido')return 'fashion';
  return 'other';
 }
