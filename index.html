@@ -149,6 +149,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
   <main id="board" hidden>
     <div class="boardbar">
       <h2 id="boardTitle">Sala</h2>
+      <button class="btn" id="changeImageBtn" type="button" hidden>Cambiar dibujo</button>
       <button class="btn" id="codeBtn" title="Copiar invitación"><span class="code" id="codeTxt"></span> · Copiar</button>
     </div>
     <div class="peers" id="peers" style="margin-bottom:12px"></div>
@@ -181,7 +182,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
   <div id="toast" role="status" aria-live="polite"></div>
 </div>
 <script type="module">
-let initializeApp, getAuth, signInAnonymously, getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, getDatabase, ref, set, onValue, onDisconnect, remove;
+let initializeApp, getAuth, signInAnonymously, getFirestore, doc, setDoc, getDoc, getDocs, collection, onSnapshot, deleteDoc, getDatabase, ref, set, onValue, onDisconnect, remove;
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiuxuf1vgFK1xjuur2b5fLXE-HLdpZOG0",
@@ -332,7 +333,8 @@ function vectorScene(def) {
     hit(x, y, ctx, sc) {
       ctx.save(); ctx.setTransform(sc, 0, 0, sc, 0, 0);
       let found = -1;
-      for (let i = regs.length - 1; i >= 0; i--) if (ctx.isPointInPath(regs[i], x * sc, y * sc)) { found = i; break; }
+      // regs[0] is the full-page background; it must never be a paintable region.
+      for (let i = regs.length - 1; i >= 1; i--) if (ctx.isPointInPath(regs[i], x * sc, y * sc)) { found = i; break; }
       ctx.restore(); return found;
     },
     draw(ctx, fills, scale) {
@@ -349,34 +351,35 @@ function vectorScene(def) {
 
 /* Raster scene built from a line mask (1 = line). Every pixel belongs to a sector, so colors reach under the lines. */
 function labelRegions(mask, w, h, minArea) {
-  const n = w * h, comp = new Int32Array(n).fill(-1), areas = [];
+  const n = w * h, comp = new Int32Array(n).fill(-1), areas = [], touchesEdge = [];
   const stack = new Int32Array(n);
   let nc = 0;
   for (let s = 0; s < n; s++) {
     if (mask[s] || comp[s] >= 0) continue;
-    let sp = 0, area = 0; stack[sp++] = s; comp[s] = nc;
+    let sp = 0, area = 0, edge = false; stack[sp++] = s; comp[s] = nc;
     while (sp) {
       const p = stack[--sp]; area++;
       const x = p % w, y = (p - x) / w;
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) edge = true;
       if (x > 0 && !mask[p - 1] && comp[p - 1] < 0) { comp[p - 1] = nc; stack[sp++] = p - 1; }
       if (x < w - 1 && !mask[p + 1] && comp[p + 1] < 0) { comp[p + 1] = nc; stack[sp++] = p + 1; }
       if (y > 0 && !mask[p - w] && comp[p - w] < 0) { comp[p - w] = nc; stack[sp++] = p - w; }
       if (y < h - 1 && !mask[p + w] && comp[p + w] < 0) { comp[p + w] = nc; stack[sp++] = p + w; }
     }
-    areas.push(area); nc++;
+    areas.push(area); touchesEdge.push(edge); nc++;
   }
   const remap = new Int32Array(nc).fill(-1); let count = 0;
-  for (let c = 0; c < nc; c++) if (areas[c] >= minArea) remap[c] = count++;
+  for (let c = 0; c < nc; c++) if (areas[c] >= minArea && !touchesEdge[c]) remap[c] = count++;
   const labels = new Int32Array(n).fill(-1);
-  if (!count) { labels.fill(0); return { labels, count: 1 }; }
+  if (!count) return { labels, count: 0 };
   const q = new Int32Array(n); let qh = 0, qt = 0;
   for (let p = 0; p < n; p++) if (comp[p] >= 0 && remap[comp[p]] >= 0) { labels[p] = remap[comp[p]]; q[qt++] = p; }
   while (qh < qt) {
     const p = q[qh++], l = labels[p], x = p % w;
-    if (x > 0 && labels[p - 1] < 0) { labels[p - 1] = l; q[qt++] = p - 1; }
-    if (x < w - 1 && labels[p + 1] < 0) { labels[p + 1] = l; q[qt++] = p + 1; }
-    if (p >= w && labels[p - w] < 0) { labels[p - w] = l; q[qt++] = p - w; }
-    if (p < n - w && labels[p + w] < 0) { labels[p + w] = l; q[qt++] = p + w; }
+    if (x > 0 && !mask[p - 1] && labels[p - 1] < 0) { labels[p - 1] = l; q[qt++] = p - 1; }
+    if (x < w - 1 && !mask[p + 1] && labels[p + 1] < 0) { labels[p + 1] = l; q[qt++] = p + 1; }
+    if (p >= w && !mask[p - w] && labels[p - w] < 0) { labels[p - w] = l; q[qt++] = p - w; }
+    if (p < n - w && !mask[p + w] && labels[p + w] < 0) { labels[p + w] = l; q[qt++] = p + w; }
   }
   return { labels, count };
 }
@@ -392,7 +395,8 @@ function rasterScene(mask, w, h, minArea) {
       fills.forEach((c, i) => { if (i < count) { const r = hexRGB(c); tab[i * 3] = r[0]; tab[i * 3 + 1] = r[1]; tab[i * 3 + 2] = r[2]; } });
       for (let p = 0, o = 0; p < w * h; p++, o += 4) {
         if (mask[p]) { d[o] = ink[0]; d[o + 1] = ink[1]; d[o + 2] = ink[2]; }
-        else { const l = labels[p] * 3; d[o] = tab[l]; d[o + 1] = tab[l + 1]; d[o + 2] = tab[l + 2]; }
+        else if (labels[p] >= 0) { const l = labels[p] * 3; d[o] = tab[l]; d[o + 1] = tab[l + 1]; d[o + 2] = tab[l + 2]; }
+        else { d[o] = d[o + 1] = d[o + 2] = 255; }
         d[o + 3] = 255;
       }
       ctx.putImageData(buf, 0, 0);
@@ -479,7 +483,7 @@ const PALETTE = ['#E63946', '#FF6B6B', '#FF8FAB', '#F72585', '#FF9F1C', '#FFB703
   '#06A77D', '#52B788', '#95D5B2', '#8AC926', '#1D3557', '#3A86FF', '#4CC9F0', '#A8DADC',
   '#7209B7', '#9B5DE5', '#C77DFF', '#E0AAFF', '#6F4E37', '#D4A373', '#2B2D42', '#8D99AE'];
 const PASTEL = ['#FFD6E0', '#FFE5B4', '#FFF3B0', '#CDEAC0', '#BDE0FE', '#D7C6FF', '#F9C6E4'];
-let brush = PALETTE[3], erasing = false, BOARD = null, UP = null, toastT, resetT;
+let brush = PALETTE[3], erasing = false, BOARD = null, UP = null, selectingImage = false, toastT, resetT;
 const HEX = /^#[0-9a-f]{6}$/i;
 const safeColor = (c, d) => (typeof c === 'string' && /^#[0-9a-f]{3,8}$/i.test(c)) ? c : d;
 
@@ -519,7 +523,7 @@ function buildLibrary() {
     const t = document.createElement('b'); t.textContent = def.name;
     const s = document.createElement('span'); s.textContent = def.hint + ' · ' + sc.count + ' sectores';
     b.append(c, t, s);
-    b.onclick = () => startBoard({ kind: 'lib', key: def.key, name: def.name, w: def.w, h: def.h });
+    b.onclick = () => { const meta = { kind: 'lib', key: def.key, name: def.name, w: def.w, h: def.h }; if (BOARD && selectingImage) changeRoomImage(meta, sc); else startBoard(meta); };
     box.append(b);
   });
 }
@@ -529,6 +533,7 @@ async function startBoard(meta, pending) {
   if (CAP.db) {
     const id = newId();
     try {
+      meta = { ...meta, imageVersion: meta.imageVersion || (String(Date.now()) + '-' + Math.random().toString(36).slice(2, 7)) };
       await setDoc(doc(CAP.db, 'boards', id), { ...meta, createdBy: ME.id, createdAt: Date.now() });
       location.hash = id; return;
     } catch (e) {
@@ -541,6 +546,49 @@ async function startBoard(meta, pending) {
   const scene = pending || await sceneFromMeta(meta);
   if (scene) mountBoard('solo', meta, scene, false);
 }
+
+async function changeRoomImage(meta, scene) {
+  const b = BOARD;
+  if (!b || !scene) return false;
+  if (b.shared && b.meta.createdBy !== ME.id) { toast('Solo quien creó la sala puede cambiar el dibujo.'); return false; }
+  try {
+    let nextMeta = { ...meta };
+    if (b.shared) {
+      await Promise.all([...b.q.values()]);
+      const oldFills = await getDocs(collection(CAP.db, 'boards', b.id, 'fills'));
+      const oldDocs = oldFills.docs;
+      for (let i = 0; i < oldDocs.length; i += 10) {
+        await Promise.all(oldDocs.slice(i, i + 10).map(d => deleteDoc(d.ref)));
+      }
+      nextMeta = {
+        ...nextMeta,
+        createdBy: b.meta.createdBy,
+        createdAt: b.meta.createdAt,
+        updatedAt: Date.now(),
+        imageVersion: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 7)
+      };
+      await setDoc(doc(CAP.db, 'boards', b.id), nextMeta, { merge: true });
+    }
+    b.meta = nextMeta; b.scene = scene;
+    b.version = nextMeta.imageVersion || b.version + 1;
+    b.sc = scene.kind === 'vec' ? 1.2 : 1;
+    b.fills.clear(); b.q.clear();
+    const cv = $('cv'); cv.width = Math.round(scene.w * b.sc); cv.height = Math.round(scene.h * b.sc);
+    $('boardTitle').textContent = nextMeta.name || 'Sala';
+    $('home').hidden = true; $('board').hidden = false;
+    $('homeBtn').hidden = false; $('homeBtn').textContent = 'Inicio';
+    $('upPanel').hidden = true; selectingImage = false;
+    pushRecent(b.id, nextMeta.name);
+    redraw();
+    toast('¡Dibujo cambiado! La sala sigue siendo la misma.');
+    return true;
+  } catch (e) {
+    console.error('Change room image error:', e);
+    toast('No pude cambiar el dibujo: ' + (e?.code || e?.message || 'Error desconocido'));
+    return false;
+  }
+}
+
 async function sceneFromMeta(meta) {
   try {
     if (meta.kind === 'lib') return getScene(meta.key);
@@ -570,9 +618,11 @@ function mountBoard(id, meta, scene, shared) {
   closeBoard();
   const cv = $('cv'), sc = scene.kind === 'vec' ? 1.2 : 1;
   cv.width = Math.round(scene.w * sc); cv.height = Math.round(scene.h * sc);
-  const b = BOARD = { id, meta, scene, shared, sc, ctx: cv.getContext('2d'), fills: new Map(), q: new Map(), unsubs: [], cur: new Map(), room: null, warned: false, raf: 0, pr: 0 };
+  const b = BOARD = { id, meta, scene, shared, sc, version: meta.imageVersion || 0, ctx: cv.getContext('2d'), fills: new Map(), q: new Map(), unsubs: [], cur: new Map(), room: null, warned: false, raf: 0, pr: 0 };
   $('home').hidden = true; $('board').hidden = false; $('homeBtn').hidden = false;
   $('boardTitle').textContent = meta.name || 'Sala';
+  $('changeImageBtn').hidden = shared && meta.createdBy !== ME.id;
+  $('homeBtn').textContent = 'Inicio';
   $('codeTxt').textContent = shared ? id : 'Modo solo';
   $('zoom').value = 100; $('zoomwrap').style.width = '100%'; $('peers').textContent = ''; $('cursors').textContent = '';
   const note = $('boardNote'); note.hidden = shared;
@@ -581,6 +631,17 @@ function mountBoard(id, meta, scene, shared) {
   window.scrollTo(0, 0);
   if (!shared) return;
   pushRecent(id, meta.name);
+  b.unsubs.push(onSnapshot(doc(CAP.db, 'boards', id), async snap => {
+    if (!snap.exists() || BOARD !== b) return;
+    const nextMeta = snap.data(), nextVersion = nextMeta.imageVersion || 0;
+    if (nextVersion === b.version) return;
+    const nextScene = await sceneFromMeta(nextMeta);
+    if (!nextScene || BOARD !== b) return;
+    b.meta = nextMeta; b.scene = nextScene; b.version = nextVersion;
+    b.sc = nextScene.kind === 'vec' ? 1.2 : 1;
+    cv.width = Math.round(nextScene.w * b.sc); cv.height = Math.round(nextScene.h * b.sc);
+    b.fills.clear(); $('boardTitle').textContent = nextMeta.name || 'Sala'; redraw();
+  }, () => toast('No se pudo actualizar el dibujo de la sala.')));
   b.unsubs.push(onSnapshot(collection(CAP.db, 'boards', id, 'fills'), snap => {
     snap.docChanges().forEach(ch => {
       const rid = +ch.doc.id, d = ch.doc.data();
@@ -592,6 +653,7 @@ function mountBoard(id, meta, scene, shared) {
   joinRoom(b);
 }
 function closeBoard() {
+  selectingImage = false;
   const b = BOARD; if (!b) { $('board').hidden = true; $('home').hidden = false; $('homeBtn').hidden = true; return; }
   b.unsubs.forEach(u => { try { u(); } catch (e) { } });
   if (b.room) { try { b.room.leave(); } catch (e) { } }
@@ -710,7 +772,14 @@ $('eraser').addEventListener('click', () => {
   else setBrush(brush);
 });
 $('zoom').addEventListener('input', e => { $('zoomwrap').style.width = e.target.value + '%'; });
-$('homeBtn').addEventListener('click', () => { if (location.hash) location.hash = ''; else closeBoard(); });
+$('homeBtn').addEventListener('click', () => { if (selectingImage && BOARD) { selectingImage = false; $('home').hidden = true; $('board').hidden = false; $('homeBtn').textContent = 'Inicio'; return; } if (location.hash) location.hash = ''; else closeBoard(); });
+$('changeImageBtn').addEventListener('click', () => {
+  if (!BOARD || (BOARD.shared && BOARD.meta.createdBy !== ME.id)) return;
+  selectingImage = true; $('board').hidden = true; $('home').hidden = false;
+  $('homeBtn').hidden = false; $('homeBtn').textContent = 'Volver a la sala';
+  $('upPanel').hidden = true; UP = null; $('createUp').textContent = 'Cambiar dibujo de la sala';
+  window.scrollTo(0, 0);
+});
 $('codeBtn').addEventListener('click', async () => {
   if (!BOARD || !BOARD.shared) return;
   const href = /^https?:/.test(location.href) ? '\n' + location.href : '';
@@ -784,10 +853,16 @@ $('amount').addEventListener('input', e => { if (UP) { UP.amount = +e.target.val
 $('cancelUp').addEventListener('click', () => { $('upPanel').hidden = true; UP = null; });
 $('createUp').addEventListener('click', async () => {
   const u = UP; if (!u || !u.scene) return;
-  const btn = $('createUp'); btn.disabled = true; btn.textContent = 'Creando…';
+  const btn = $('createUp'); btn.disabled = true; btn.textContent = selectingImage ? 'Cambiando…' : 'Creando…';
   const meta = { kind: 'up', name: u.name, w: u.src.w, h: u.src.h, minArea: areaFor(u.amount) };
   try {
-    if (!CAP.db) { mountBoard('solo', meta, u.scene, false); }
+    if (BOARD && selectingImage) {
+      if (BOARD.shared) {
+        const blob = await maskToPNG(u.mask, u.src.w, u.src.h);
+        if (blob.size >= 150000) toast('Esta imagen es demasiado grande para compartirla sin almacenamiento adicional. Prueba con menos detalle.');
+        else { meta.png = await blobToDataURL(blob); await changeRoomImage(meta, u.scene); }
+      } else await changeRoomImage(meta, u.scene);
+    } else if (!CAP.db) { mountBoard('solo', meta, u.scene, false); }
     else {
       const blob = await maskToPNG(u.mask, u.src.w, u.src.h);
       if (blob.size >= 150000) {
@@ -798,8 +873,8 @@ $('createUp').addEventListener('click', async () => {
       }
     }
     $('upPanel').hidden = true; UP = null;
-  } catch (e) { toast('No pude crear la sala con esa imagen.'); }
-  btn.disabled = false; btn.textContent = 'Crear sala con esta imagen';
+  } catch (e) { toast('No pude cambiar o crear la sala con esta imagen.'); }
+  btn.disabled = false; btn.textContent = BOARD && selectingImage ? 'Cambiar dibujo de la sala' : 'Crear sala con esta imagen';
 });
 
 /* boot: Firebase anonymous sign-in + services */
@@ -818,7 +893,7 @@ async function initCaps() {
     ]);
     ({ initializeApp } = appMod);
     ({ getAuth, signInAnonymously } = authMod);
-    ({ getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } = firestoreMod);
+    ({ getFirestore, doc, setDoc, getDoc, getDocs, collection, onSnapshot, deleteDoc } = firestoreMod);
     ({ getDatabase, ref, set, onValue, onDisconnect, remove } = databaseMod);
     CAP.app = initializeApp(firebaseConfig);
     CAP.auth = getAuth(CAP.app);
