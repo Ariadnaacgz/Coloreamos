@@ -47,6 +47,12 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);min-width:0}
 .tile:hover{border-color:var(--accent)}
+.tile-wrap{position:relative;min-width:0}
+.tile-wrap .tile{width:100%;height:100%;padding-bottom:42px}
+.fav-btn{position:absolute;right:17px;bottom:17px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;width:34px;height:34px;cursor:pointer;font-size:18px}
+.fav-btn[aria-pressed="true"]{color:#e63976;border-color:#e63976}
+.library-tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;align-items:center}
+.library-tools input{max-width:320px}
 .tile canvas{width:100%;aspect-ratio:1;border-radius:8px;background:var(--paper);display:block}
 .tile b{font:700 15px/1.2 var(--display)}
 .tile span{font-size:13px;color:var(--muted)}
@@ -76,6 +82,8 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
 .cur{position:absolute;transform:translate(-4px,-4px);transition:left .09s linear,top .09s linear,opacity .3s;display:flex;align-items:center;gap:4px;white-space:nowrap}
 .cur b{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
 .cur span{font-size:12px;font-weight:700;color:#fff;background:#23253F;border-radius:6px;padding:1px 6px}
+.tool-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool-actions .btn{padding:8px 10px}
 .dock{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:grid;gap:14px}
 @media (max-width:860px){.dock{position:sticky;bottom:0;border-radius:16px 16px 0 0;padding-bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:5;gap:10px}}
 .pal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px}
@@ -112,6 +120,11 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
 
     <section class="sec">
       <h2>Biblioteca</h2>
+      <div class="library-tools">
+        <input id="librarySearch" type="text" placeholder="Buscar dibujos…" aria-label="Buscar dibujos">
+        <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
+        <button class="btn" id="allDrawings" type="button" aria-pressed="true">Todos</button>
+      </div>
       <div class="grid" id="library">
         <label class="tile up" for="file" id="upTile">
           <span class="plus" aria-hidden="true">+</span>
@@ -171,6 +184,10 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
         <div>
           <div class="muted" id="progTxt" style="margin-bottom:6px"></div>
           <div class="bar"><i id="progBar"></i></div>
+        </div>
+        <div class="tool-actions">
+          <button class="btn" id="undo" type="button" disabled>↶ Deshacer</button>
+          <button class="btn" id="redo" type="button" disabled>↷ Rehacer</button>
         </div>
         <div class="row">
           <button class="btn" id="dl">Guardar PNG</button>
@@ -319,6 +336,47 @@ addScene('corazon', 'Corazón doble', 'Uno por lado, para dos', () => {
   [700, 590, 480, 370, 260, 150].forEach(s => { R.push(heartHalf(cx, cy, s, -1)); R.push(heartHalf(cx, cy, s, 1)); });
   [[80, 80], [920, 80], [80, 920], [920, 920]].forEach(p => R.push(heart(p[0], p[1], 90)));
   return { R, L };
+});
+/* Mandalas de alta complejidad: pétalos y secciones independientes. */
+addScene('mandala-floral','Mandala floral XXL','Flores, hojas y muchos detalles',()=>{
+ const R=[],L=[],c=500;R.push(rect(0,0,1000,1000),circ(c,c,472));
+ for(let i=0;i<32;i++)R.push(ann(c,c,438,472,i*11.25,(i+1)*11.25));
+ R.push(circ(c,c,430));
+ for(let i=0;i<24;i++){const a=i*15,p=P(c,c,345,a);R.push(ell(p[0],p[1],92,38,a));}
+ R.push(circ(c,c,275));
+ for(let i=0;i<24;i++){const a=i*15+7.5,p=P(c,c,220,a);R.push(ell(p[0],p[1],68,30,a));}
+ R.push(circ(c,c,155));for(let i=0;i<16;i++)R.push(ann(c,c,92,155,i*22.5,(i+1)*22.5));
+ R.push(circ(c,c,88));for(let i=0;i<12;i++){const p=P(c,c,48,i*30);R.push(circ(p[0],p[1],18));}return {R,L};
+});
+addScene('mandala-geometrico','Mandala geométrico','Simetría y patrones pequeños',()=>{
+ const R=[],L=[],c=500;R.push(rect(0,0,1000,1000),circ(c,c,475));
+ for(let i=0;i<40;i++)R.push(ann(c,c,440,475,i*9,(i+1)*9));R.push(circ(c,c,435));
+ for(let i=0;i<32;i++){const a=i*11.25,p=P(c,c,370,a);R.push(poly([P(c,c,435,a-4),p,P(c,c,435,a+4),P(c,c,315,a)]));}
+ R.push(circ(c,c,310));for(let i=0;i<24;i++){const a=i*15,p=P(c,c,250,a);R.push(ell(p[0],p[1],82,28,a));}
+ R.push(circ(c,c,175));for(let i=0;i<16;i++)R.push(ann(c,c,105,175,i*22.5,(i+1)*22.5));R.push(circ(c,c,100));return {R,L};
+});
+addScene('mandala-loto','Flor de loto','Pétalos superpuestos y ornamentos',()=>{
+ const R=[],L=[],c=500;R.push(rect(0,0,1000,1000),circ(c,c,470));
+ for(let i=0;i<28;i++)R.push(ann(c,c,440,470,i*360/28,(i+1)*360/28));R.push(circ(c,c,435));
+ for(let i=0;i<20;i++){const a=i*18,p=P(c,c,325,a);R.push(ell(p[0],p[1],125,42,a));}
+ for(let i=0;i<20;i++){const a=i*18+9,p=P(c,c,245,a);R.push(ell(p[0],p[1],100,34,a));}
+ R.push(circ(c,c,165));for(let i=0;i<16;i++){const a=i*22.5,p=P(c,c,110,a);R.push(ell(p[0],p[1],48,23,a));}R.push(circ(c,c,55));return {R,L};
+});
+addScene('mandala-sol','Mandala solar','Rayos, pétalos y círculos',()=>{
+ const R=[],L=[],c=500;R.push(rect(0,0,1000,1000),circ(c,c,475));
+ for(let i=0;i<36;i++)R.push(ann(c,c,440,475,i*10,(i+1)*10));R.push(circ(c,c,435));
+ for(let i=0;i<36;i++){const a=i*10+5,p=P(c,c,350,a);R.push(ell(p[0],p[1],72,25,a));}
+ R.push(circ(c,c,270));for(let i=0;i<24;i++){const a=i*15,p=P(c,c,205,a);R.push(ell(p[0],p[1],62,24,a));}
+ R.push(circ(c,c,145));for(let i=0;i<16;i++)R.push(ann(c,c,75,145,i*22.5,(i+1)*22.5));R.push(circ(c,c,70));return {R,L};
+});
+addScene('zorro','Zorro del bosque','Animal con detalles para pintar',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,500,470));
+ R.push(poly([[250,360],[285,120],[445,285]]),poly([[750,360],[715,120],[555,285]]));
+ R.push(ell(500,520,260,300),ell(500,650,175,160),ell(390,455,85,105),ell(610,455,85,105));
+ R.push(circ(390,455,42),circ(610,455,42),ell(500,600,115,75),circ(500,555,38));
+ R.push(ell(420,740,55,95,-20),ell(580,740,55,95,20));
+ for(let i=0;i<12;i++){const p=P(500,520,210,i*30);R.push(circ(p[0],p[1],18));}
+ L.push('M350 350q35-35 70 0M580 350q35-35 70 0');return {R,L};
 });
 /* ---------- Scene engines: both expose {w,h,count,hit(x,y),draw(ctx,fills,scale)} ---------- */
 const INK = '#23253F';
@@ -484,6 +542,7 @@ const PALETTE = ['#E63946', '#FF6B6B', '#FF8FAB', '#F72585', '#FF9F1C', '#FFB703
   '#7209B7', '#9B5DE5', '#C77DFF', '#E0AAFF', '#6F4E37', '#D4A373', '#2B2D42', '#8D99AE'];
 const PASTEL = ['#FFD6E0', '#FFE5B4', '#FFF3B0', '#CDEAC0', '#BDE0FE', '#D7C6FF', '#F9C6E4'];
 let brush = PALETTE[3], erasing = false, BOARD = null, UP = null, selectingImage = false, toastT, resetT;
+let libraryMode='all',libraryQuery='';
 const HEX = /^#[0-9a-f]{6}$/i;
 const safeColor = (c, d) => (typeof c === 'string' && /^#[0-9a-f]{3,8}$/i.test(c)) ? c : d;
 
@@ -513,20 +572,27 @@ function renderRecents() {
 }
 
 /* library */
-function buildLibrary() {
-  const box = $('library');
-  Object.values(SCENES).forEach(def => {
-    const sc = getScene(def.key), b = document.createElement('button');
-    b.className = 'tile'; b.type = 'button';
-    const c = document.createElement('canvas'); c.width = c.height = 260;
-    sc.draw(c.getContext('2d'), pastelFills(sc.count), 0.26);
-    const t = document.createElement('b'); t.textContent = def.name;
-    const s = document.createElement('span'); s.textContent = def.hint + ' · ' + sc.count + ' sectores';
-    b.append(c, t, s);
-    b.onclick = () => { const meta = { kind: 'lib', key: def.key, name: def.name, w: def.w, h: def.h }; if (BOARD && selectingImage) changeRoomImage(meta, sc); else startBoard(meta); };
-    box.append(b);
-  });
+function favoriteIds(){try{return JSON.parse(localStorage.getItem('col.favorites')||'[]')}catch(e){return[]}}
+function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
+function buildLibrary(){
+ const box=$('library');box.textContent='';
+ const upload=document.createElement('label');upload.className='tile up';upload.htmlFor='file';upload.id='upTile';upload.innerHTML='<span class="plus" aria-hidden="true">+</span><b>Subir mi imagen</b><span>Foto o dibujo; la dividimos en sectores</span>';
+ if(libraryMode==='all'&&!libraryQuery)box.append(upload);
+ Object.values(SCENES).forEach(def=>{
+  const isFav=favoriteIds().includes(def.key);if(libraryMode==='favorites'&&!isFav)return;
+  if(libraryQuery&&!(def.name+' '+def.hint).toLowerCase().includes(libraryQuery))return;
+  const sc=getScene(def.key),wrap=document.createElement('div'),b=document.createElement('button');wrap.className='tile-wrap';b.className='tile';b.type='button';
+  const c=document.createElement('canvas');c.width=c.height=260;sc.draw(c.getContext('2d'),pastelFills(sc.count),.26);
+  const t=document.createElement('b');t.textContent=def.name;const sub=document.createElement('span');sub.textContent=def.hint+' · '+sc.count+' sectores';b.append(c,t,sub);
+  b.onclick=()=>{const meta={kind:'lib',key:def.key,name:def.name,w:def.w,h:def.h};if(BOARD&&selectingImage)changeRoomImage(meta,sc);else startBoard(meta)};
+  const fav=document.createElement('button');fav.className='fav-btn';fav.type='button';fav.textContent=isFav?'♥':'♡';fav.title=isFav?'Quitar de favoritos':'Agregar a favoritos';fav.setAttribute('aria-pressed',isFav?'true':'false');
+  fav.onclick=e=>{e.stopPropagation();setFavorite(def.key,!isFav);buildLibrary()};wrap.append(b,fav);box.append(wrap);
+ });
+ if(!box.children.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='No hay dibujos que coincidan. Prueba otra búsqueda.';box.append(empty)}
 }
+$('librarySearch').addEventListener('input',e=>{libraryQuery=e.target.value.trim().toLowerCase();buildLibrary()});
+$('favoritesFilter').addEventListener('click',()=>{libraryMode='favorites';$('favoritesFilter').setAttribute('aria-pressed','true');$('allDrawings').setAttribute('aria-pressed','false');buildLibrary()});
+$('allDrawings').addEventListener('click',()=>{libraryMode='all';$('favoritesFilter').setAttribute('aria-pressed','false');$('allDrawings').setAttribute('aria-pressed','true');buildLibrary()});
 
 /* creating / opening boards */
 async function startBoard(meta, pending) {
@@ -572,7 +638,7 @@ async function changeRoomImage(meta, scene) {
     b.meta = nextMeta; b.scene = scene;
     b.version = nextMeta.imageVersion || b.version + 1;
     b.sc = scene.kind === 'vec' ? 1.2 : 1;
-    b.fills.clear(); b.q.clear();
+    b.fills.clear(); b.q.clear(); b.undo.length=0; b.redo.length=0; updateHistoryButtons();
     const cv = $('cv'); cv.width = Math.round(scene.w * b.sc); cv.height = Math.round(scene.h * b.sc);
     $('boardTitle').textContent = nextMeta.name || 'Sala';
     $('home').hidden = true; $('board').hidden = false;
@@ -619,13 +685,13 @@ function mountBoard(id, meta, scene, shared) {
   closeBoard();
   const cv = $('cv'), sc = scene.kind === 'vec' ? 1.2 : 1;
   cv.width = Math.round(scene.w * sc); cv.height = Math.round(scene.h * sc);
-  const b = BOARD = { id, meta, scene, shared, sc, version: meta.imageVersion || 0, ctx: cv.getContext('2d'), fills: new Map(), q: new Map(), unsubs: [], cur: new Map(), room: null, warned: false, raf: 0, pr: 0 };
+  const b = BOARD = { id, meta, scene, shared, sc, version: meta.imageVersion || 0, ctx: cv.getContext('2d'), fills: new Map(), q: new Map(), undo: [], redo: [], unsubs: [], cur: new Map(), room: null, warned: false, raf: 0, pr: 0 };
   $('home').hidden = true; $('board').hidden = false; $('homeBtn').hidden = false;
   $('boardTitle').textContent = meta.name || 'Sala';
   $('changeImageBtn').hidden = shared && meta.createdBy !== ME.id;
   $('homeBtn').textContent = 'Inicio';
   $('codeTxt').textContent = shared ? id : 'Modo solo';
-  $('zoom').value = 100; $('zoomwrap').style.width = '100%'; $('peers').textContent = ''; $('cursors').textContent = '';
+  $('zoom').value = 100; $('zoomwrap').style.width = '100%'; $('peers').textContent = ''; $('cursors').textContent = ''; updateHistoryButtons();
   const note = $('boardNote'); note.hidden = shared;
   if (!shared) note.textContent = 'Estás en modo solo. Para colorear con otra persona abre esta página con tu cuenta y crea una sala.';
   redraw();
@@ -641,7 +707,7 @@ function mountBoard(id, meta, scene, shared) {
     b.meta = nextMeta; b.scene = nextScene; b.version = nextVersion;
     b.sc = nextScene.kind === 'vec' ? 1.2 : 1;
     cv.width = Math.round(nextScene.w * b.sc); cv.height = Math.round(nextScene.h * b.sc);
-    b.fills.clear(); $('boardTitle').textContent = nextMeta.name || 'Sala'; redraw();
+    b.fills.clear(); b.undo.length=0; b.redo.length=0; updateHistoryButtons(); $('boardTitle').textContent = nextMeta.name || 'Sala'; redraw();
   }, () => toast('No se pudo actualizar el dibujo de la sala.')));
   b.unsubs.push(onSnapshot(collection(CAP.db, 'boards', id, 'fills'), snap => {
     snap.docChanges().forEach(ch => {
@@ -673,16 +739,19 @@ function redraw() {
     $('progBar').style.width = (t ? n / t * 100 : 0) + '%';
   });
 }
-function paint(rid) {
-  const b = BOARD, color = erasing ? null : brush;
-  if (color === null && !b.fills.has(rid)) return;
-  if (color !== null && b.fills.get(rid) === color) return;
-  if (!b.shared) { if (color) b.fills.set(rid, color); else b.fills.delete(rid); redraw(); return; }
-  const fillRef = doc(CAP.db, 'boards', b.id, 'fills', String(rid));
-  const p = (b.q.get(rid) || Promise.resolve()).then(() => color ? setDoc(fillRef, { c: color, by: ME.id, t: Date.now() }) : deleteDoc(fillRef))
-    .catch(() => { if (!b.warned) { b.warned = true; toast('No se pudo pintar. Es posible que tu acceso sea solo para mirar.'); } });
-  b.q.set(rid, p);
+function updateHistoryButtons(){const b=BOARD;$('undo').disabled=!b||!b.undo.length;$('redo').disabled=!b||!b.redo.length}
+function persistFill(b,rid,color){if(!b.shared)return Promise.resolve();const fillRef=doc(CAP.db,'boards',b.id,'fills',String(rid));const p=(b.q.get(rid)||Promise.resolve()).then(()=>color?setDoc(fillRef,{c:color,by:ME.id,t:Date.now()}):deleteDoc(fillRef)).catch(()=>{if(!b.warned){b.warned=true;toast('No se pudo guardar el cambio en la sala.')}});b.q.set(rid,p);return p}
+function paint(rid){const b=BOARD,color=erasing?null:brush;if(!b||(color===null&&!b.fills.has(rid))||(color!==null&&b.fills.get(rid)===color))return;
+ const before=b.fills.has(rid)?b.fills.get(rid):null;b.undo.push({rid,before,after:color});if(b.undo.length>100)b.undo.shift();b.redo.length=0;
+ if(color===null)b.fills.delete(rid);else b.fills.set(rid,color);redraw();updateHistoryButtons();persistFill(b,rid,color);
 }
+async function applyHistory(from,to,undoing){const b=BOARD;if(!b||!from.length)return;const a=from.pop(),expected=undoing?a.after:a.before,target=undoing?a.before:a.after;const current=b.fills.has(a.rid)?b.fills.get(a.rid):null;
+ if(current!==expected){from.push(a);toast('Ese sector cambió en la sala. No puedo pisar el cambio de otra persona.');updateHistoryButtons();return}
+ if(target===null)b.fills.delete(a.rid);else b.fills.set(a.rid,target);to.push(a);redraw();updateHistoryButtons();await persistFill(b,a.rid,target)
+}
+$('undo').addEventListener('click',()=>applyHistory(BOARD?.undo||[],BOARD?.redo||[],true));
+$('redo').addEventListener('click',()=>applyHistory(BOARD?.redo||[],BOARD?.undo||[],false));
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)applyHistory(BOARD?.redo||[],BOARD?.undo||[],false);else applyHistory(BOARD?.undo||[],BOARD?.redo||[],true)}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();applyHistory(BOARD?.redo||[],BOARD?.undo||[],false)}});
 function pointerToScene(e) {
   const r = $('cv').getBoundingClientRect(), nx = (e.clientX - r.left) / r.width, ny = (e.clientY - r.top) / r.height;
   return { nx, ny, x: nx * BOARD.scene.w, y: ny * BOARD.scene.h };
@@ -809,8 +878,9 @@ $('reset').addEventListener('click', async () => {
   }
   clearTimeout(resetT); btn.dataset.sure = ''; btn.textContent = 'Vaciar';
   const ids = [...b.fills.keys()];
-  if (!b.shared) { b.fills.clear(); redraw(); return; }
+  if (!b.shared) { b.fills.clear(); b.undo.length=0; b.redo.length=0; updateHistoryButtons(); redraw(); return; }
   for (let i = 0; i < ids.length; i += 8) await Promise.all(ids.slice(i, i + 8).map(r => deleteDoc(doc(CAP.db, 'boards', b.id, 'fills', String(r))).catch(() => { })));
+  b.undo.length=0; b.redo.length=0; updateHistoryButtons();
 });
 
 /* join by code */
