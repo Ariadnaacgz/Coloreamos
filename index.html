@@ -122,6 +122,13 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
       <h2>Biblioteca</h2>
       <div class="library-tools">
         <input id="librarySearch" type="text" placeholder="Buscar dibujos…" aria-label="Buscar dibujos">
+      <div class="library-tools" id="categoryFilters" aria-label="Categorías">
+        <button class="btn primary" type="button" data-category="all" aria-pressed="true">Todos</button>
+        <button class="btn" type="button" data-category="animals" aria-pressed="false">🐾 Animales</button>
+        <button class="btn" type="button" data-category="flowers" aria-pressed="false">🌸 Flores</button>
+        <button class="btn" type="button" data-category="mandalas" aria-pressed="false">✿ Mandalas</button>
+        <button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
+      </div>
         <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
         <button class="btn" id="allDrawings" type="button" aria-pressed="true">Todos</button>
       </div>
@@ -378,6 +385,40 @@ addScene('zorro','Zorro del bosque','Animal con detalles para pintar',()=>{
  for(let i=0;i<12;i++){const p=P(500,520,210,i*30);R.push(circ(p[0],p[1],18));}
  L.push('M350 350q35-35 70 0M580 350q35-35 70 0');return {R,L};
 });
+
+addScene('gato','Gato curioso','Animal · carita y detalles',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,520,455));
+ R.push(poly([[300,390],[285,175],[455,315]]),poly([[700,390],[715,175],[545,315]]));
+ R.push(ell(500,530,245,245),ell(500,700,170,105));
+ R.push(ell(405,505,62,82,-12),ell(595,505,62,82,12));
+ R.push(circ(420,510,25),circ(580,510,25),ell(500,590,68,42),poly([[475,575],[525,575],[500,610]]));
+ R.push(ell(360,625,75,35,-12),ell(640,625,75,35,12));
+ R.push(ell(405,790,75,42),ell(595,790,75,42));
+ R.push(circ(320,570,18),circ(680,570,18),circ(350,600,12),circ(650,600,12));
+ L.push('M455 640q45 28 90 0M430 670l-130 10M430 690l-125 45M570 670l130 10M570 690l125 45');
+ return {R,L};
+});
+addScene('buho','Búho del bosque','Animal · plumas y ojos',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,520,455));
+ R.push(poly([[300,330],[250,170],[430,280]]),poly([[700,330],[750,170],[570,280]]));
+ R.push(ell(500,540,245,300),ell(500,680,155,145));
+ R.push(circ(405,465,105),circ(595,465,105),circ(405,465,58),circ(595,465,58));
+ R.push(circ(405,465,24),circ(595,465,24),poly([[460,575],[540,575],[500,650]]));
+ for(let i=0;i<7;i++){const x=320+i*60;R.push(ell(x,735,27,65,(i-3)*8));}
+ R.push(ell(390,835,80,28,-10),ell(610,835,80,28,10));
+ L.push('M300 390q-45-55-70-10M700 390q45-55 70-10');
+ return {R,L};
+});
+addScene('tortuga','Tortuga','Animal · caparazón por partes',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,520,455));
+ R.push(ell(500,570,260,205),ell(790,540,105,90));
+ R.push(ell(315,735,75,110,-25),ell(685,735,75,110,25),ell(340,405,70,95,25),ell(660,405,70,95,-25));
+ R.push(circ(825,510,18),circ(825,570,18),ell(500,570,180,135));
+ R.push(poly([[500,450],[590,520],[555,625],[445,625],[410,520]]));
+ R.push(ell(460,850,85,38),ell(650,850,85,38));
+ L.push('M770 585q35 35 70 0M420 500l80-50 80 50M420 640l80 55 80-55');
+ return {R,L};
+});
 /* ---------- Scene engines: both expose {w,h,count,hit(x,y),draw(ctx,fills,scale)} ---------- */
 const INK = '#23253F';
 function hexRGB(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -542,7 +583,7 @@ const PALETTE = ['#E63946', '#FF6B6B', '#FF8FAB', '#F72585', '#FF9F1C', '#FFB703
   '#7209B7', '#9B5DE5', '#C77DFF', '#E0AAFF', '#6F4E37', '#D4A373', '#2B2D42', '#8D99AE'];
 const PASTEL = ['#FFD6E0', '#FFE5B4', '#FFF3B0', '#CDEAC0', '#BDE0FE', '#D7C6FF', '#F9C6E4'];
 let brush = PALETTE[3], erasing = false, BOARD = null, UP = null, selectingImage = false, toastT, resetT;
-let libraryMode='all',libraryQuery='';
+let libraryMode='all',libraryQuery='',libraryCategory='all';
 const HEX = /^#[0-9a-f]{6}$/i;
 const safeColor = (c, d) => (typeof c === 'string' && /^#[0-9a-f]{3,8}$/i.test(c)) ? c : d;
 
@@ -574,22 +615,37 @@ function renderRecents() {
 /* library */
 function favoriteIds(){try{return JSON.parse(localStorage.getItem('col.favorites')||'[]')}catch(e){return[]}}
 function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
+function sceneCategory(key){
+ if(key.startsWith('mandala'))return 'mandalas';
+ if(['flor','mandala-loto'].includes(key))return 'flowers';
+ if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
+ return 'other';
+}
 function buildLibrary(){
  const box=$('library');box.textContent='';
  const upload=document.createElement('label');upload.className='tile up';upload.htmlFor='file';upload.id='upTile';upload.innerHTML='<span class="plus" aria-hidden="true">+</span><b>Subir mi imagen</b><span>Foto o dibujo; la dividimos en sectores</span>';
- if(libraryMode==='all'&&!libraryQuery)box.append(upload);
+ if(libraryMode==='all'&&!libraryQuery&&libraryCategory==='all')box.append(upload);
  Object.values(SCENES).forEach(def=>{
-  const isFav=favoriteIds().includes(def.key);if(libraryMode==='favorites'&&!isFav)return;
+  const category=sceneCategory(def.key),isFav=favoriteIds().includes(def.key);
+  if(libraryMode==='favorites'&&!isFav)return;
+  if(libraryCategory!=='all'&&category!==libraryCategory)return;
   if(libraryQuery&&!(def.name+' '+def.hint).toLowerCase().includes(libraryQuery))return;
   const sc=getScene(def.key),wrap=document.createElement('div'),b=document.createElement('button');wrap.className='tile-wrap';b.className='tile';b.type='button';
   const c=document.createElement('canvas');c.width=c.height=260;sc.draw(c.getContext('2d'),pastelFills(sc.count),.26);
   const t=document.createElement('b');t.textContent=def.name;const sub=document.createElement('span');sub.textContent=def.hint+' · '+sc.count+' sectores';b.append(c,t,sub);
   b.onclick=()=>{const meta={kind:'lib',key:def.key,name:def.name,w:def.w,h:def.h};if(BOARD&&selectingImage)changeRoomImage(meta,sc);else startBoard(meta)};
   const fav=document.createElement('button');fav.className='fav-btn';fav.type='button';fav.textContent=isFav?'♥':'♡';fav.title=isFav?'Quitar de favoritos':'Agregar a favoritos';fav.setAttribute('aria-pressed',isFav?'true':'false');
-  fav.onclick=e=>{e.stopPropagation();setFavorite(def.key,!isFav);buildLibrary()};wrap.append(b,fav);box.append(wrap);
+  fav.onclick=e=>{e.stopPropagation();setFavorite(def.key,!isFav);buildLibrary()};
+  wrap.append(b,fav);box.append(wrap);
  });
- if(!box.children.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='No hay dibujos que coincidan. Prueba otra búsqueda.';box.append(empty)}
+ if(!box.children.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='No hay dibujos en esta categoría. Prueba otra.';box.append(empty)}
 }
+$('categoryFilters').addEventListener('click',e=>{
+ const b=e.target.closest('[data-category]');if(!b)return;
+ libraryCategory=b.dataset.category;
+ $('categoryFilters').querySelectorAll('[data-category]').forEach(x=>{const active=x===b;x.setAttribute('aria-pressed',active?'true':'false');x.classList.toggle('primary',active)});
+ buildLibrary();
+});
 $('librarySearch').addEventListener('input',e=>{libraryQuery=e.target.value.trim().toLowerCase();buildLibrary()});
 $('favoritesFilter').addEventListener('click',()=>{libraryMode='favorites';$('favoritesFilter').setAttribute('aria-pressed','true');$('allDrawings').setAttribute('aria-pressed','false');buildLibrary()});
 $('allDrawings').addEventListener('click',()=>{libraryMode='all';$('favoritesFilter').setAttribute('aria-pressed','false');$('allDrawings').setAttribute('aria-pressed','true');buildLibrary()});
