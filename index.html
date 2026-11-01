@@ -89,6 +89,9 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
 .note{font-size:14px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin:0 0 12px}
 #toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90vw}
 #toast.on{opacity:1;transform:translate(-50%,0)}
+.connection-status{margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font-size:14px}
+.connection-status[data-state="ok"]{border-color:#238636;color:#238636}
+.connection-status[data-state="error"]{border-color:var(--warn);color:var(--warn)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div class="app">
@@ -96,6 +99,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
     <p class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Coloreamos</p>
     <button class="btn" id="homeBtn" hidden>Inicio</button>
   </header>
+  <p class="connection-status" id="connectionStatus" data-state="loading" role="status" aria-live="polite">Conectando con Firebase…</p>
 
   <main id="home">
     <h1>Pinten juntos, sector por sector.</h1>
@@ -177,10 +181,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
   <div id="toast" role="status" aria-live="polite"></div>
 </div>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+let initializeApp, getAuth, signInAnonymously, getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, getDatabase, ref, set, onValue, onDisconnect, remove;
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiuxuf1vgFK1xjuur2b5fLXE-HLdpZOG0",
@@ -530,7 +531,12 @@ async function startBoard(meta, pending) {
     try {
       await setDoc(doc(CAP.db, 'boards', id), { ...meta, createdBy: ME.id, createdAt: Date.now() });
       location.hash = id; return;
-    } catch (e) { toast('No pude crear la sala compartida. Abrimos una sala solo para ti.'); }
+    } catch (e) {
+      console.error('Firestore create board error:', e);
+      const detail = e?.code || e?.message || 'Error desconocido';
+      setConnectionStatus('Firebase conectó, pero Firestore rechazó crear la sala: ' + detail, 'error');
+      toast('Error al crear sala: ' + detail);
+    }
   }
   const scene = pending || await sceneFromMeta(meta);
   if (scene) mountBoard('solo', meta, scene, false);
@@ -797,8 +803,23 @@ $('createUp').addEventListener('click', async () => {
 });
 
 /* boot: Firebase anonymous sign-in + services */
+function setConnectionStatus(message, state = 'loading') {
+  const el = $('connectionStatus');
+  if (el) { el.textContent = message; el.dataset.state = state; }
+}
 async function initCaps() {
   try {
+    setConnectionStatus('Cargando los servicios de Firebase…');
+    const [appMod, authMod, firestoreMod, databaseMod] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js'),
+      import('https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js')
+    ]);
+    ({ initializeApp } = appMod);
+    ({ getAuth, signInAnonymously } = authMod);
+    ({ getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } = firestoreMod);
+    ({ getDatabase, ref, set, onValue, onDisconnect, remove } = databaseMod);
     CAP.app = initializeApp(firebaseConfig);
     CAP.auth = getAuth(CAP.app);
     const credential = await signInAnonymously(CAP.auth);
@@ -807,10 +828,13 @@ async function initCaps() {
     CAP.db = getFirestore(CAP.app);
     CAP.room = getDatabase(CAP.app);
     $('dl').hidden = false;
+    setConnectionStatus('Conectada a Firebase. Ya puedes crear una sala compartida.', 'ok');
     toast('Conectada a Coloreamos. ¡Ya puedes crear una sala!');
   } catch (e) {
     console.error('Firebase init error:', e);
-    toast('No se pudo conectar con Firebase. Revisa Authentication y las reglas.');
+    const detail = e?.code || e?.message || String(e);
+    setConnectionStatus('No se pudo iniciar Firebase: ' + detail, 'error');
+    toast('Error de Firebase: ' + detail);
   }
 }
 buildPalette(); buildLibrary(); renderRecents();
