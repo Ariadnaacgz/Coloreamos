@@ -129,7 +129,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
         <button class="btn" type="button" data-category="mandalas" aria-pressed="false">✿ Mandalas</button>
         <button class="btn" type="button" data-category="characters" aria-pressed="false">🧸 Personajes</button>
         <button class="btn" type="button" data-category="vehicles" aria-pressed="false">🚗 Autos y vehículos</button>
-        <button class="btn" type="button" data-category="food" aria-pressed="false">🍰 Comidas kawaii</button><button class="btn" type="button" data-category="pets" aria-pressed="false">🐶 Mascotas</button><button class="btn" type="button" data-category="fantasy" aria-pressed="false">🏰 Fantasía</button><button class="btn" type="button" data-category="home" aria-pressed="false">🏡 Hogar</button><button class="btn" type="button" data-category="fashion" aria-pressed="false">👗 Moda</button><button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
+        <button class="btn" type="button" data-category="nature" aria-pressed="false">🦋 Naturaleza</button><button class="btn" type="button" data-category="food" aria-pressed="false">🍰 Comidas kawaii</button><button class="btn" type="button" data-category="pets" aria-pressed="false">🐶 Mascotas</button><button class="btn" type="button" data-category="fantasy" aria-pressed="false">🏰 Fantasía</button><button class="btn" type="button" data-category="home" aria-pressed="false">🏡 Hogar</button><button class="btn" type="button" data-category="fashion" aria-pressed="false">👗 Moda</button><button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
       </div>
         <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
         <button class="btn" id="allDrawings" type="button" aria-pressed="true">Todos</button>
@@ -354,6 +354,7 @@ addScene('casita-cozy','Casita acogedora','Hogar · ventanas y jardín',()=>{con
 addScene('vestido','Vestido de gala','Moda · falda y detalles',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000));R.push(poly([[420,180],[580,180],[610,340],[790,830],[210,830],[390,340]]));R.push(poly([[420,180],[500,300],[580,180],[610,340],[390,340]]));for(let i=0;i<5;i++)R.push(star(350+i*75,600+(i%2)*90,24));return {R,L};});
 addScene('dragon','Dragón amistoso','Fantasía · alas y escamas',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),star(170,160,40),star(830,170,40));R.push(ell(500,540,185,210),ell(500,360,165,145),ell(350,500,125,70,-35),ell(650,500,125,70,35));R.push(poly([[390,270],[350,160],[455,245]]),poly([[610,270],[650,160],[545,245]]));R.push(circ(440,350,22),circ(560,350,22),ell(500,420,70,35));R.push(ell(390,740,65,100,-20),ell(610,740,65,100,20));return {R,L};});
 addScene('conejo','Conejito','Mascotas · orejas largas',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,540,450));R.push(ell(405,260,72,190,-12),ell(595,260,72,190,12),ell(500,570,210,225));R.push(ell(420,530,32,45),ell(580,530,32,45),circ(420,530,13),circ(580,530,13));R.push(circ(500,610,28),ell(500,665,65,30),ell(400,800,90,55),ell(600,800,90,55));return {R,L};});
+addScene('abejita','Abejita','Naturaleza · alas y flores',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),circ(820,160,58));R.push(ell(500,500,190,135),ell(340,410,105,150,-35),ell(660,410,105,150,35));R.push(ell(500,530,170,120),ell(445,490,24,34),ell(555,490,24,34),circ(445,490,10),circ(555,490,10));R.push(ell(500,565,60,30),ann(500,500,90,170,65,115),ann(500,500,90,170,125,175));return {R,L};});
 addScene('mariposa', 'Mariposa', 'Dos alas, dos manos', () => {
   const R = [], L = [];
   R.push(rect(0, 0, 1000, 1000), circ(500, 520, 440));
@@ -750,6 +751,7 @@ function sceneCategory(key){
  if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
  if(['robot-amigo','astronauta','unicornio'].includes(key))return 'characters';
  if(['auto','auto-carrera','avion'].includes(key))return 'vehicles';
+ if(key==='mariposa'||key==='abejita')return 'nature';
  if(key==='helado')return 'food'; if(key==='perrito'||key==='conejo')return 'pets'; if(key==='castillo'||key==='dragon')return 'fantasy'; if(key==='casita-cozy')return 'home'; if(key==='vestido')return 'fashion';
  return 'other';
 }
