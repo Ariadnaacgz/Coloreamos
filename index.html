@@ -346,6 +346,7 @@ addScene('ramo-flores','Ramo de flores','Rosas, margaritas y hojas para pintar',
  L.push('M300 400Q350 500 470 590M520 370Q520 470 510 580M755 470Q690 530 545 620');
  return {R,L};
 });
+addScene('helado','Helados kawaii','Comidas · cucuruchos y toppings',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000));R.push(poly([[300,490],[700,490],[520,930],[480,930]]));R.push(ell(400,430,145,145),ell(600,430,145,145),ell(500,300,150,150));return {R,L};});
 addScene('mariposa', 'Mariposa', 'Dos alas, dos manos', () => {
   const R = [], L = [];
   R.push(rect(0, 0, 1000, 1000), circ(500, 520, 440));
