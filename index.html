@@ -578,6 +578,7 @@ async function changeRoomImage(meta, scene) {
     $('home').hidden = true; $('board').hidden = false;
     $('homeBtn').hidden = false; $('homeBtn').textContent = 'Inicio';
     $('upPanel').hidden = true; selectingImage = false;
+    $('createUp').textContent = 'Crear sala con esta imagen';
     pushRecent(b.id, nextMeta.name);
     redraw();
     toast('¡Dibujo cambiado! La sala sigue siendo la misma.');
@@ -654,6 +655,7 @@ function mountBoard(id, meta, scene, shared) {
 }
 function closeBoard() {
   selectingImage = false;
+  $('createUp').textContent = 'Crear sala con esta imagen';
   const b = BOARD; if (!b) { $('board').hidden = true; $('home').hidden = false; $('homeBtn').hidden = true; return; }
   b.unsubs.forEach(u => { try { u(); } catch (e) { } });
   if (b.room) { try { b.room.leave(); } catch (e) { } }
