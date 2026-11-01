@@ -280,6 +280,72 @@ addScene('flor', 'Flor', 'Para empezar', () => {
   return { R, L };
 });
 
+
+/* Nuevas flores individuales para colorear: pétalos, hojas y tallos por separado. */
+addScene('tulipanes','Tulipanes','Tres tulipanes con pétalos y hojas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(820,150,65));
+ R.push('M475 420C470 570 430 720 455 930L505 930C485 740 530 590 525 420Z');
+ R.push('M495 490C370 540 300 650 270 770C390 745 475 650 495 490Z');
+ R.push('M505 600C625 610 710 720 755 840C625 805 540 720 505 600Z');
+ R.push('M475 420C350 390 320 270 380 170C425 220 450 275 475 330Z');
+ R.push('M500 420C430 300 450 150 500 100C550 150 570 300 500 420Z');
+ R.push('M525 420C550 275 575 220 620 170C680 270 650 390 525 420Z');
+ R.push('M470 420C390 420 315 365 300 285C365 300 425 335 485 390Z');
+ R.push('M530 420C610 420 685 365 700 285C635 300 575 335 515 390Z');
+ R.push('M455 930L505 930L520 965L440 965Z');
+ L.push('M500 480Q480 680 480 900M470 610Q370 650 300 750M515 650Q650 700 730 820');
+ return {R,L};
+});
+addScene('rosas','Rosas','Tres rosas con pétalos en capas',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000),circ(820,155,58));
+ R.push('M485 440C470 590 440 730 455 930L510 930C500 740 535 590 520 440Z');
+ R.push('M490 570C365 600 300 700 275 820C395 790 465 700 490 570Z');
+ R.push('M510 650C630 660 700 750 740 860C625 825 545 750 510 650Z');
+ // Rose head: outer petals, middle petals and a curled center.
+ R.push('M500 430C330 450 300 300 390 210C420 270 455 290 500 300C545 290 580 270 610 210C700 300 670 450 500 430Z');
+ R.push('M390 330C405 235 475 190 500 260C525 190 595 235 610 330C580 390 540 410 500 390C460 410 420 390 390 330Z');
+ R.push('M430 320C450 265 490 250 500 300C510 250 550 265 570 320C550 365 520 375 500 350C480 375 450 365 430 320Z');
+ R.push('M470 310C480 285 520 285 530 310C530 340 510 350 500 330C490 350 470 340 470 310Z');
+ R.push(circ(500,310,15));
+ R.push(ell(500,445,95,28,0));
+ L.push('M500 470Q490 680 485 900M480 640Q380 690 300 800');
+ return {R,L};
+});
+addScene('girasol','Girasol','Pétalos, semillas y hojas',()=>{
+ const R=[],L=[],cx=500,cy=390;
+ R.push(rect(0,0,1000,1000),circ(820,145,60));
+ R.push('M485 520C475 660 450 790 465 940L520 940C505 790 530 650 515 520Z');
+ R.push('M490 650C365 630 285 710 250 830C380 805 455 735 490 650Z');
+ R.push('M515 700C640 675 725 765 770 875C640 845 550 780 515 700Z');
+ for(let i=0;i<16;i++){const a=i*22.5,p=P(cx,cy,205,a);R.push(ell(p[0],p[1],105,48,a));}
+ R.push(circ(cx,cy,145));
+ for(let i=0;i<12;i++){const a=i*30,p=P(cx,cy,92,a);R.push(circ(p[0],p[1],23));}
+ R.push(circ(cx,cy,48));
+ L.push('M500 530Q490 720 495 920M475 680Q370 700 280 810M520 730Q650 750 745 850');
+ return {R,L};
+});
+addScene('ramo-flores','Ramo de flores','Rosas, margaritas y hojas para pintar',()=>{
+ const R=[],L=[];R.push(rect(0,0,1000,1000));
+ // Tallos y hojas
+ R.push('M470 560Q420 720 360 900L395 920Q475 750 510 560Z');
+ R.push('M510 560Q560 730 640 900L675 880Q590 700 535 550Z');
+ R.push('M490 600Q330 620 235 750Q390 760 490 650Z');
+ R.push('M530 650Q680 610 790 730Q650 770 530 700Z');
+ R.push('M450 760Q350 760 285 850Q390 875 460 810Z');
+ // Margarita izquierda
+ for(let i=0;i<8;i++){const a=i*45,p=P(300,350,100,a);R.push(ell(p[0],p[1],68,32,a));}
+ R.push(circ(300,350,48));
+ // Flor central
+ for(let i=0;i<10;i++){const a=i*36,p=P(520,300,125,a);R.push(ell(p[0],p[1],82,38,a));}
+ R.push(circ(520,300,62));
+ // Flor derecha
+ for(let i=0;i<7;i++){const a=i*360/7,p=P(755,420,92,a);R.push(ell(p[0],p[1],65,34,a));}
+ R.push(circ(755,420,42));
+ // Moño del ramo
+ R.push(poly([[430,760],[500,800],[570,760],[555,850],[500,900],[445,850]]),circ(500,805,28));
+ L.push('M300 400Q350 500 470 590M520 370Q520 470 510 580M755 470Q690 530 545 620');
+ return {R,L};
+});
 addScene('mariposa', 'Mariposa', 'Dos alas, dos manos', () => {
   const R = [], L = [];
   R.push(rect(0, 0, 1000, 1000), circ(500, 520, 440));
@@ -671,7 +737,7 @@ function renderRecents() {
 function favoriteIds(){try{return JSON.parse(localStorage.getItem('col.favorites')||'[]')}catch(e){return[]}}
 function setFavorite(key,on){const ids=favoriteIds().filter(x=>x!==key);if(on)ids.push(key);try{localStorage.setItem('col.favorites',JSON.stringify(ids))}catch(e){}}
 function sceneCategory(key){
- if(['flor','mandala-loto'].includes(key))return 'flowers';
+ if(['flor','mandala-loto','tulipanes','rosas','girasol','ramo-flores'].includes(key))return 'flowers';
  if(key.startsWith('mandala'))return 'mandalas';
  if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
  if(['robot-amigo','astronauta','unicornio'].includes(key))return 'characters';
