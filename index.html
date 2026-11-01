@@ -129,7 +129,7 @@ input[type=text]{border:1px solid var(--line);background:var(--surface);color:va
         <button class="btn" type="button" data-category="mandalas" aria-pressed="false">✿ Mandalas</button>
         <button class="btn" type="button" data-category="characters" aria-pressed="false">🧸 Personajes</button>
         <button class="btn" type="button" data-category="vehicles" aria-pressed="false">🚗 Autos y vehículos</button>
-        <button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
+        <button class="btn" type="button" data-category="food" aria-pressed="false">🍰 Comidas kawaii</button><button class="btn" type="button" data-category="pets" aria-pressed="false">🐶 Mascotas</button><button class="btn" type="button" data-category="fantasy" aria-pressed="false">🏰 Fantasía</button><button class="btn" type="button" data-category="home" aria-pressed="false">🏡 Hogar</button><button class="btn" type="button" data-category="fashion" aria-pressed="false">👗 Moda</button><button class="btn" type="button" data-category="other" aria-pressed="false">Otros</button>
       </div>
         <button class="btn" id="favoritesFilter" type="button" aria-pressed="false">♡ Favoritos</button>
         <button class="btn" id="allDrawings" type="button" aria-pressed="true">Todos</button>
@@ -347,6 +347,13 @@ addScene('ramo-flores','Ramo de flores','Rosas, margaritas y hojas para pintar',
  return {R,L};
 });
 addScene('helado','Helados kawaii','Comidas · cucuruchos y toppings',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000));R.push(poly([[300,490],[700,490],[520,930],[480,930]]));R.push(ell(400,430,145,145),ell(600,430,145,145),ell(500,300,150,150));return {R,L};});
+
+addScene('perrito','Perrito','Mascotas · orejas y collar',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,510,455));R.push(ell(500,520,230,245),ell(300,430,85,170,-25),ell(700,430,85,170,25));R.push(ell(410,490,42,54),ell(590,490,42,54),circ(410,490,18),circ(590,490,18));R.push(ell(500,600,105,75),circ(500,565,42),ell(500,655,48,22));R.push(ell(390,850,70,42),ell(610,850,70,42));L.push('M455 675q45 35 90 0');return {R,L};});
+addScene('castillo','Castillo mágico','Fantasía · torres y banderines',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),star(180,160,45),star(820,180,42));R.push(rect(260,420,480,450),rect(150,330,145,540),rect(705,330,145,540));R.push(poly([[150,330],[222,190],[295,330]]),poly([[705,330],[778,190],[850,330]]),poly([[350,420],[500,220],[650,420]]));R.push(rect(430,650,140,220),ell(500,650,70,35));R.push(rect(185,430,70,100),rect(740,430,70,100),rect(365,520,75,95),rect(560,520,75,95));return {R,L};});
+addScene('casita-cozy','Casita acogedora','Hogar · ventanas y jardín',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),circ(820,150,62));R.push(rect(240,430,520,430),poly([[180,460],[500,190],[820,460]]),rect(420,620,160,240));R.push(rect(290,520,115,120),rect(595,520,115,120),rect(335,690,70,90));R.push(rect(110,760,60,150),circ(140,700,90),rect(830,760,60,150),circ(860,700,90));return {R,L};});
+addScene('vestido','Vestido de gala','Moda · falda y detalles',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000));R.push(poly([[420,180],[580,180],[610,340],[790,830],[210,830],[390,340]]));R.push(poly([[420,180],[500,300],[580,180],[610,340],[390,340]]));for(let i=0;i<5;i++)R.push(star(350+i*75,600+(i%2)*90,24));return {R,L};});
+addScene('dragon','Dragón amistoso','Fantasía · alas y escamas',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),star(170,160,40),star(830,170,40));R.push(ell(500,540,185,210),ell(500,360,165,145),ell(350,500,125,70,-35),ell(650,500,125,70,35));R.push(poly([[390,270],[350,160],[455,245]]),poly([[610,270],[650,160],[545,245]]));R.push(circ(440,350,22),circ(560,350,22),ell(500,420,70,35));R.push(ell(390,740,65,100,-20),ell(610,740,65,100,20));return {R,L};});
+addScene('conejo','Conejito','Mascotas · orejas largas',()=>{const R=[],L=[];R.push(rect(0,0,1000,1000),circ(500,540,450));R.push(ell(405,260,72,190,-12),ell(595,260,72,190,12),ell(500,570,210,225));R.push(ell(420,530,32,45),ell(580,530,32,45),circ(420,530,13),circ(580,530,13));R.push(circ(500,610,28),ell(500,665,65,30),ell(400,800,90,55),ell(600,800,90,55));return {R,L};});
 addScene('mariposa', 'Mariposa', 'Dos alas, dos manos', () => {
   const R = [], L = [];
   R.push(rect(0, 0, 1000, 1000), circ(500, 520, 440));
@@ -743,6 +750,7 @@ function sceneCategory(key){
  if(['zorro','gato','buho','tortuga'].includes(key))return 'animals';
  if(['robot-amigo','astronauta','unicornio'].includes(key))return 'characters';
  if(['auto','auto-carrera','avion'].includes(key))return 'vehicles';
+ if(key==='helado')return 'food'; if(key==='perrito'||key==='conejo')return 'pets'; if(key==='castillo'||key==='dragon')return 'fantasy'; if(key==='casita-cozy')return 'home'; if(key==='vestido')return 'fashion';
  return 'other';
 }
 function buildLibrary(){
